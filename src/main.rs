@@ -6,7 +6,7 @@ use std::time::Duration;
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
     hal::{
-        gpio::OutputPin,
+        gpio::{OutputPin, PinDriver},
         peripheral::Peripheral,
         peripherals::Peripherals,
         rmt::{
@@ -28,17 +28,29 @@ fn main() -> Result<(), EspError> {
     let _sysloop = EspSystemEventLoop::take()?;
     log::info!("Hello, world!");
 
-    let mut leds = WS2812B::new(peripherals.pins.gpio2, peripherals.rmt.channel0).unwrap();
-    let mut colors = [
-        RGB8::new(255, 0, 0),
-        RGB8::new(0, 255, 0),
-        RGB8::new(0, 0, 255),
-        RGB8::new(255, 0, 0),
-        RGB8::new(0, 255, 0),
-    ];
+    // let mut leds = WS2812B::new(peripherals.pins.gpio2, peripherals.rmt.channel0).unwrap();
+    // let mut colors = [
+    //     RGB8::new(255, 0, 0),
+    //     RGB8::new(0, 255, 0),
+    //     RGB8::new(0, 0, 255),
+    //     RGB8::new(255, 0, 0),
+    //     RGB8::new(0, 255, 0),
+    // ];
+    let mut pin = PinDriver::output(peripherals.pins.gpio2).unwrap();
+    pin.set_low();
+    std::thread::sleep(Duration::from_secs(1));
     loop {
-        leds.set_pixels(&colors).unwrap();
-        colors.rotate_left(1);
+        // leds.set_pixels(&colors).unwrap();
+        // colors.rotate_left(1);
+        // std::thread::sleep(Duration::from_secs(1));
+
+        for _ in (0..24) {
+            pin.set_high();
+            std::thread::sleep(Duration::from_nanos(700));
+
+            pin.set_low();
+            std::thread::sleep(Duration::from_nanos(600));
+        }
         std::thread::sleep(Duration::from_secs(1));
     }
 }
